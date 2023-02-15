@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.18;
 
+import "./pixel_prismatica_data.sol";
 import "https://github.com/musicslayer/standard_contract/blob/main/contracts/standard_contract.sol";
 
 // import "@openzeppelin/contracts/token/ERC1155/extensions/IERC1155MetadataURI.sol";
@@ -65,6 +66,8 @@ contract PixelPrismatica is StandardContract, IERC1155MetadataURI, IERC2981 {
     /*
         NFT Variables
     */
+    PixelPrismaticaData private constant DATA = PixelPrismaticaData(address(0));
+
     uint256 private currentID;
 
     uint256 private mintFee;
@@ -76,9 +79,10 @@ contract PixelPrismatica is StandardContract, IERC1155MetadataURI, IERC2981 {
     string private storeImageURI;
     string private storeName;
 
-    //mapping(uint256 => uint256) private map_id2Config???;
+    mapping(uint256 => uint256) private map_id2Config;
+
     mapping(address => mapping(address => bool)) private map_address2OperatorAddress2IsApproved;
-    mapping(uint256 => mapping(address => uint256)) private map_id2address2balance;
+    mapping(uint256 => mapping(address => uint256)) private map_id2Address2Balance;
 
     /*
     *
@@ -135,7 +139,7 @@ contract PixelPrismatica is StandardContract, IERC1155MetadataURI, IERC2981 {
     // IERC1155 Implementation
     function balanceOf(address account, uint256 id) public view virtual override returns (uint256) {
         require(account != address(0), "ERC1155: address zero is not a valid owner");
-        return map_id2address2balance[id][account];
+        return map_id2Address2Balance[id][account];
     }
 
     function balanceOfBatch(address[] memory accounts, uint256[] memory ids) public view virtual override returns (uint256[] memory) {
@@ -167,11 +171,11 @@ contract PixelPrismatica is StandardContract, IERC1155MetadataURI, IERC2981 {
         require(to != address(0), "ERC1155: transfer to the zero address");
         require(from == msg.sender || isApprovedForAll(from, msg.sender), "ERC1155: caller is not token owner or approved");
 
-        uint256 fromBalance = map_id2address2balance[id][from];
+        uint256 fromBalance = map_id2Address2Balance[id][from];
         require(fromBalance >= amount, "ERC1155: insufficient balance for transfer");
 
-        map_id2address2balance[id][from] = fromBalance - amount;
-        map_id2address2balance[id][to] += amount;
+        map_id2Address2Balance[id][from] = fromBalance - amount;
+        map_id2Address2Balance[id][to] += amount;
 
         emit TransferSingle(msg.sender, from, to, id, amount);
 
@@ -188,11 +192,11 @@ contract PixelPrismatica is StandardContract, IERC1155MetadataURI, IERC2981 {
             uint256 id = ids[i];
             uint256 amount = amounts[i];
 
-            uint256 fromBalance = map_id2address2balance[id][from];
+            uint256 fromBalance = map_id2Address2Balance[id][from];
             require(fromBalance >= amount, "ERC1155: insufficient balance for transfer");
 
-            map_id2address2balance[id][from] = fromBalance - amount;
-            map_id2address2balance[id][to] += amount;
+            map_id2Address2Balance[id][from] = fromBalance - amount;
+            map_id2Address2Balance[id][to] += amount;
         }
 
         emit TransferBatch(msg.sender, from, to, ids, amounts);
@@ -233,11 +237,11 @@ contract PixelPrismatica is StandardContract, IERC1155MetadataURI, IERC2981 {
     }
 
     // IERC1155MetadataURI Implementation
-    function uri(uint256 id) external pure returns (string memory) {
+    function uri(uint256 id) external view returns (string memory) {
         // The JSON data is directly encoded here.
         string memory name = string.concat("Pixel Prismatica NFT #", uint256ToString(id));
-        string memory description = createDescription();
-        string memory imageURI = createImageURI();
+        string memory description = createDescription(id);
+        string memory imageURI = createImageURI(id);
 
         string memory uriString = string.concat('{"name":"', name, '", "description":"', description, '", "image":"', imageURI, '"}');
         return string(abi.encodePacked('data:application/json;base64,', Base64.encode(abi.encodePacked(uriString))));
@@ -260,15 +264,15 @@ contract PixelPrismatica is StandardContract, IERC1155MetadataURI, IERC2981 {
         Action Functions
     */
 
-    function mint(address _address, bytes memory _data) private {
+    function mint(address _address, uint256 _config, bytes memory _data) private {
         // This NFT is always minted one at a time.
         requireNotPaused();
         require(_address != address(0), "ERC1155: mint to the zero address");
 
         currentID++;
 
-        //setIDConfig ????
-        map_id2address2balance[currentID][_address] = 1;
+        map_id2Address2Balance[currentID][_address] = 1;
+        map_id2Config[currentID] = _config;
 
         // Every time an NFT is minted, increase the minting cost for the next one.
         setMintFee((getMintFee() * 105) / 100);
@@ -283,12 +287,12 @@ contract PixelPrismatica is StandardContract, IERC1155MetadataURI, IERC2981 {
         Helper Functions
     */
 
-    function createDescription() private pure returns (string memory) {
-        return "D";
+    function createDescription(uint256 _id) private view returns (string memory) {
+        return string.concat("Configuration: ", DATA.getConfigName(map_id2Config[_id]));
     }
 
-    function createImageURI() private pure returns (string memory) {
-        return "I";
+    function createImageURI(uint256 _id) private view returns (string memory) {
+        return DATA.getConfigURI(map_id2Config[_id]);
     }
 
     /*
@@ -404,29 +408,31 @@ contract PixelPrismatica is StandardContract, IERC1155MetadataURI, IERC2981 {
     */
 
     /// @notice A user can mint an NFT for a token address.
+    /// @param _config Desired configuration for the NFT.
     /// @param _data Additional data with no specified format.
-    function action_mint(bytes memory _data) external payable {
+    function action_mint(uint256 _config, bytes memory _data) external payable {
         lock();
 
         requireRemainingMints();
         requireMintFee(msg.value);
 
-        mint(msg.sender, _data);
+        mint(msg.sender, _config, _data);
 
         unlock();
     }
 
     /// @notice The operator can trigger a mint for someone else.
     /// @param _address The address that the operator is triggering the mint for.
+    /// @param _config Desired configuration for the NFT.
     /// @param _data Additional data with no specified format.
-    function action_mintOther(address _address, bytes memory _data) external payable {
+    function action_mintOther(address _address, uint256 _config, bytes memory _data) external payable {
         lock();
 
         requireOperatorAddress(msg.sender);
         requireRemainingMints();
         requireMintFee(msg.value);
         
-        mint(_address, _data);
+        mint(_address, _config, _data);
 
         unlock();
     }
