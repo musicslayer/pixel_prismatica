@@ -53,7 +53,7 @@ contract PixelPrismatica is StandardContract, IERC1155MetadataURI, IERC2981 {
     */
 
     // Helper Contracts
-    PixelPrismaticaUtils private constant UTILS = PixelPrismaticaUtils(0x1fda57CC3a0227146Ea8F4681Afd7480F6F63c61);
+    PixelPrismaticaUtils private constant UTILS = PixelPrismaticaUtils(0x44E0DA58B239D218164E3746E6b02372785A4413);
 
     // Chain information.
     uint256 private constant CHAIN_ID = 56;
