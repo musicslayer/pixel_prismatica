@@ -7,7 +7,7 @@ https://musicslayer.github.io/pixel_prismatica_dapp/
 Pixel Prismatica is a collection of configurable NFT tokens featuring animated pixel art, capped at 100 per network.<br/>
 The animation pattern of each NFT is pseudorandomly calculated based on the EVM Chain ID and the NFT ID, so no two NFTs are exactly the same.
 
-## Sample
+## Sample Image
 ![](sample.svg)
 
 ## Features
