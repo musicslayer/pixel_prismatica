@@ -34,7 +34,7 @@ The first NFT of each network's collection will have an initial minting fee. Tha
 ## Royalties
 Each NFT provides the creator with a 3% royalty whenever it is sold on a marketplace supporting ERC-2981.
 
-## Contracts
+## Contract
 The NFT contract is currently deployed on the following networks:<br/>
 Ethereum: [0x35A90f051B482958b5C8d98679adC9871Ed31551](https://etherscan.io/address/0x35A90f051B482958b5C8d98679adC9871Ed31551)<br/>
 Binance Smart Chain: [0x35A90f051B482958b5C8d98679adC9871Ed31551](https://bscscan.com/address/0x35A90f051B482958b5C8d98679adC9871Ed31551)
