@@ -8,7 +8,7 @@ Pixel Prismatica is a collection of configurable NFT tokens featuring animated p
 The animation pattern of each NFT is pseudorandomly calculated based on the EVM Chain ID and the NFT ID, so no two NFTs are exactly the same.
 
 ## Sample
-![](https://musicslayer.github.io/pixel_prismatica_dapp/svg/rainbow_light.svg)
+![](sample.svg)
 
 ## Features
 - Unlike other NFTs that merely link to an image, this NFT generates the image data within its smart contract. This means that it is not reliant on any third-party file hosting service. As long as the blockchain persists, no one can take your NFT image away from you.
