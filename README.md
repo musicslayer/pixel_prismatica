@@ -1,8 +1,8 @@
 # Pixel Prismatica NFT Smart Contract
 The smart contract for the Pixel Prismatica NFT.<br/><br/>
 To purchase or interact with the NFTs, visit the dapp here:<br/>
-https://musicslayer.github.io/pixel_prismatica_dapp/
-
+https://musicslayer.github.io/pixel_prismatica_dapp/<br/><br/>
+Github: https://github.com/musicslayer/pixel_prismatica_dapp
 ## Summary
 Pixel Prismatica is a collection of configurable NFT tokens featuring on-chain animated pixel art.
 
